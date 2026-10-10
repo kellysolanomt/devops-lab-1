@@ -1,0 +1,30 @@
+name: Destroy Infrastructure ksolanoc
+
+on:
+  workflow_dispatch:
+    inputs:
+      student_suffix:
+        description: 'Student Suffix (e.g. test-student)'
+        required: false
+        type: string
+
+env:
+  AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+  STUDENT_SUFFIX: ${{ inputs.student_suffix || vars.STUDENT_SUFFIX }}
+
+jobs:
+  destroy:
+    name: Destroy Infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+      - name: Run cleanup Script
+        env:
+          STUDENT_SUFFIX: ${{ env.STUDENT_SUFFIX }}
+          AWS_REGION: ${{ env.AWS_REGION }}
+        run: bash scripts/destroy.sh
